@@ -3,24 +3,28 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Kolkata
 
-
-# Install dependencies
+# Install base dependencies
 RUN apt-get update && apt-get install -y \
+    curl \
     openjdk-17-jdk \
-    nodejs \
-    npm \
     postgresql \
     postgresql-contrib \
     maven \
-    curl \
     tzdata \
-    && ln -fs /usr/share/zoneinfo/$TZ /etc/localtime \
-    && dpkg-reconfigure --frontend noninteractive tzdata \
+    gnupg \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 20 (required for Angular)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+
+# Set timezone
+RUN ln -fs /usr/share/zoneinfo/$TZ /etc/localtime \
+    && dpkg-reconfigure --frontend noninteractive tzdata
 
 # Setup PostgreSQL
 USER postgres
-RUN /etc/init.d/postgresql start && \
+RUN service postgresql start && \
     psql --command "CREATE USER appuser WITH PASSWORD 'password';" && \
     psql --command "CREATE DATABASE appdb OWNER appuser;"
 
@@ -34,7 +38,9 @@ COPY angular-app ./angular-app
 
 # Build Angular
 WORKDIR /app/angular-app
-RUN npm install && npm run build
+RUN node -v
+RUN npm install
+RUN npm run build
 
 # Build Spring Boot
 WORKDIR /app/springboot-app
