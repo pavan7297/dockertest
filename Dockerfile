@@ -1,5 +1,9 @@
 FROM ubuntu:22.04
 
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Kolkata
+
+
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     openjdk-17-jdk \
@@ -9,6 +13,9 @@ RUN apt-get update && apt-get install -y \
     postgresql-contrib \
     maven \
     curl \
+    tzdata \
+    && ln -fs /usr/share/zoneinfo/$TZ /etc/localtime \
+    && dpkg-reconfigure --frontend noninteractive tzdata \
     && rm -rf /var/lib/apt/lists/*
 
 # Setup PostgreSQL
