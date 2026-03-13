@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  fullstack-app:
+    build: .
+    container_name: angular_spring_postgres
+    ports:
+      - "4200:4200"
+      - "8080:8080"
+      - "5432:5432"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/appdb
+      SPRING_DATASOURCE_USERNAME: appuser
+      SPRING_DATASOURCE_PASSWORD: password
